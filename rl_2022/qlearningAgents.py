@@ -51,10 +51,9 @@ class QLearningAgent(ReinforcementAgent):
     """
 
     def __init__(self, **args):
-        # args may contain alpha, epsilon, gamma and training count.
         ReinforcementAgent.__init__(self, **args)
 
-        # Create an empty Q table.
+        # Creates an empty Q table. By default all values are zeros.
         self._qTable = defaultdict(lambda: defaultdict(lambda: 0))
 
     def getQValue(self, state, action):
@@ -64,7 +63,7 @@ class QLearningAgent(ReinforcementAgent):
           or the Q node value otherwise
         """
 
-        # Returns zero if not appears in the table
+        # Returns zero be default.
         return self._qTable[state][action]
 
     def computeValueFromQValues(self, state):
@@ -87,19 +86,19 @@ class QLearningAgent(ReinforcementAgent):
 
         legalActions = self.getLegalActions(state)
 
-        # Selects the actions which has highest Q-value
-        largestQValue = float('-inf')
+        # Selects the action which has highest Q-value.
+        highestQValue = float('-inf')
         bestActions = []
         for action in legalActions:
             qValue = self.getQValue(state, action)
-            if qValue > largestQValue:
-                largestQValue = qValue
+            if qValue > highestQValue:
+                highestQValue = qValue
                 bestActions = []
-            if qValue == largestQValue:
+            if qValue == highestQValue:
                 bestActions.append(action)
 
-        # Randomly picks a choice if there exist multiple best solution; or None
-        # if none.
+        # Randomly picks a choice if there exist multiple best solutions; or
+        # None if none.
         return random.choice(bestActions) if bestActions else None
 
     def getAction(self, state):
@@ -115,13 +114,13 @@ class QLearningAgent(ReinforcementAgent):
         # Pick Action
         legalActions = self.getLegalActions(state)
 
-        # Take a random action with probability epsilon.
+        # Takes a random action with probability epsilon.
         if util.flipCoin(self.epsilon):
             # If there is no legal action, returns None.
             return random.choice(legalActions) if legalActions else None
 
-        # Otherwise choose the so-called "best" solution. That is, select the
-        # action who has the largest value.
+        # Otherwise chooses the so-called "best" solution. That is, selects the
+        # action which has the highest Q value.
         return self.computeActionFromQValues(state)
 
     def update(self, state, action, nextState, reward):
@@ -133,20 +132,19 @@ class QLearningAgent(ReinforcementAgent):
           it will be called on your behalf
         """
 
-        # When the agent move from state `state` to another `nextState` via
-        # action `action`, she gets reward `reward`. Update the Q table by
-        # this behavior.
+        # When the agent moves from state `state` to another state `nextState`
+        # via the action `action`, she gets reward `reward`. Updates the Q table
+        # by this behavior.
         #
         # References:
         # - https://ithelp.ithome.com.tw/articles/10234568
         # - https://zh.wikipedia.org/wiki/Q%E5%AD%A6%E4%B9%A0
         # - https://ppt.cc/fIIUwx
-
-        # Q*[s][a] = Q[s][a] + alpha * (reward + discount * max_a Q[s'][a] - Q[s][a])
+        #
+        # Q[s][a] <- Q[s][a] + alpha * (reward + discount * max_a Q[s'][a] - Q[s][a])
         self._qTable[state][action] \
             = (1.0 - self.alpha) * self.getQValue(state, action) \
-            + self.alpha * (reward + self.discount *
-                            self.computeValueFromQValues(nextState))
+            + self.alpha * (reward + self.discount * self.computeValueFromQValues(nextState))
 
     def getPolicy(self, state):
         return self.computeActionFromQValues(state)
