@@ -63,7 +63,7 @@ class QLearningAgent(ReinforcementAgent):
           or the Q node value otherwise
         """
 
-        # Returns zero be default.
+        # Returns zero by default.
         return self._qTable[state][action]
 
     def computeValueFromQValues(self, state):
